@@ -1,0 +1,29 @@
+ED<-function(raster1=AOOraster, raster2=EOOraster, data=diffdata)
+#Description --
+  #This function calculates the overall difference in endemism scores of cells across two rasters (e.g. ones calculated using area of occupancy (AOO) and extent of occurrence (EOO) range weight methods) 
+#Arguments --
+  #raster1 and raster2 = The 2 endemism rasters you wish to compare 
+  #data = A data frame with 2 numeric columns (e.g. data.frame(Resolution=numeric(0), ED=numeric(0)) – it can be empty or already contain values)
+#Value --
+  #Returns a data frame with 2 columns (e.g. Resolution and ED) with 1 row if the input data frame is empty and n+1 rows if the input data frame contains n rows) 
+{
+  v1<-values(raster1)
+  v2<-values(raster2)
+  v1[is.na(v1)]<-0
+  v2[is.na(v2)]<-0
+  for (i in 1:length(v1)){
+    if(v1[i]==0 && v2[i]==0) {
+       v1[i]<-NA
+       v2[i]<-NA
+    }
+   }
+  v1<-v1[!is.na(v1)]
+  v2<-v2[!is.na(v2)]
+  resv<-vector(length=length(v1))
+  for (x in 1:length(resv)){
+    resv[x]=abs(v1[x]-v2[x])
+  }
+  finalresult<-(sum(resv))/length(resv)
+  res<-c(res(raster1))
+  rd<-rbind(data,setNames(as.list(c(res[1],finalresult)), names(data)))
+}
