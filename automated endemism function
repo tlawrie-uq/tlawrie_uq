@@ -44,8 +44,7 @@ automated_endemism <- function(species_records=mydata, resolutions="res_dat", sh
     colnames(newtaxadata[1])<-"Taxa"
   } # cls if(class .... 
   print(newtaxadata)
-  labels<-unique(newtaxadata$Taxa)
-    plot<-ggplot(newtaxadata, aes(Resolution, ED)) + 
+  plot<-ggplot(newtaxadata, aes(Resolution, ED)) + 
     geom_line(aes(group = Taxa), colour = "grey50") + 
     geom_point(aes(colour = Taxa)) +
     ylab("Endemism Difference") +
