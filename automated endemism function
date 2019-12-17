@@ -1,0 +1,54 @@
+automated_endemism <- function(species_records=mydata, resolutions="res_dat", shapefile="aus_poly", 
+                               species="SPECIES", longitude="LONGITUDE", latitude="LATITUDE", weight.type="cell"){
+  endemdiff<-data.frame(Resolution=numeric(0), ED=numeric(0))
+  if(class(species_records)=="data.frame"){
+    for(i in resolutions){
+      frame.raster=raster()
+      res(frame.raster)=i
+      aoo<-weighted_endemism(species_records=mydata, species="SPECIES", longitude="LONGITUDE", 
+                                latitude="LATITUDE", frame.raster=frame.raster, weight.type="cell")
+      aooraster<-aoo[["WE_raster"]]
+      eoo<-weighted_endemism(species_records=mydata, species="SPECIES", longitude="LONGITUDE", 
+                             latitude="LATITUDE", frame.raster=frame.raster, weight.type="geo")
+      eooraster<-eoo[["WE_raster"]]
+      data<-difffunc(aooraster,eooraster,endemdiff)
+      endemdiff<-data
+      } # cls for(i in ...
+    newtaxadata<-endemdiff
+  } # cls if(class ....
+  if(class(species_records)=="list"){
+    totaldata<-data.frame(Taxa=character(NULL), Resolution=numeric(0), ED=numeric(0))
+    for(i in species_records){
+      for(x in resolutions){
+        frame.raster=raster()
+        res(frame.raster)=x
+        aoo<-weighted_endemism(species_records=mydata, species="SPECIES", longitude="LONGITUDE", 
+                               latitude="LATITUDE", frame.raster=frame.raster, weight.type="cell")
+        aooraster<-aoo[["WE_raster"]]
+        eoo<-weighted_endemism(species_records=mydata, species="SPECIES", longitude="LONGITUDE", 
+                               latitude="LATITUDE", frame.raster=frame.raster, weight.type="geo")
+        eooraster<-eoo[["WE_raster"]]
+        data<-difffunc(aooraster,eooraster,endemdiff)
+        endemdiff<-data
+      } # cls for(i in res ...
+      taxadata<-endemdiff
+      taxaname<-rep("i", each=nrow(taxadata))
+      if (species_records[i]==species_records[1]){
+        newtaxadata<-cbind(taxaname, taxadata)
+      }
+      else {
+        addition<-cbind(taxaname,taxadata)
+        newtaxadata<-rbind(newtaxadata, addition)
+      }
+     }  # cls for(i in spec ...
+    colnames(newtaxadata[1])<-"Taxa"
+  } # cls if(class .... 
+  print(newtaxadata)
+  labels<-unique(newtaxadata$Taxa)
+    plot<-ggplot(newtaxadata, aes(Resolution, ED)) + 
+    geom_line(aes(group = Taxa), colour = "grey50") + 
+    geom_point(aes(colour = Taxa)) +
+    ylab("Endemism Difference") +
+    theme_bw()
+  print(plot)
+}
